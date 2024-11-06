@@ -61,7 +61,7 @@ public class teleop extends OpMode {
     }
 
     @Override
-    public void init_loop(){};
+    public void init_loop(){}
 
     @Override
     public void start(){
@@ -69,7 +69,7 @@ public class teleop extends OpMode {
         Claw.setPosition(0.0);
         rollerClaw.setPosition(1.0);
         WiperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    };
+    }
 
     @Override
     public void loop() {
