@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.utilities;
+package org.firstinspires.ftc.teamcode.Utilities;
 
 public class Constants {
     public static final double TRACKWIDTH = 0.22; //meters
@@ -8,6 +8,8 @@ public class Constants {
     public static final double DISTANCE_PER_PULSE = Math.PI * WHEEL_DIAMETER / TICKS_PER_ROTATION;
 
 
+    public static final int ViperUpperAngle = 270;
+    public static final int ViperLowerAngle = 0;
     public static final int ViperUpperGoalPosition = 4000;
     public static final int ViperRetractedPosition = 0;
 }

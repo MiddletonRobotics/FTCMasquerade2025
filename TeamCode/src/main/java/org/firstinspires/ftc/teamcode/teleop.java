@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.utilities.Constants;
+import org.firstinspires.ftc.teamcode.Utilities.Constants;
 
 @TeleOp(name= "teleop")
 public class teleop extends OpMode {
@@ -13,11 +13,16 @@ public class teleop extends OpMode {
     private DcMotor FrontRight;
     private DcMotor BackLeft;
     private DcMotor BackRight;
-    private DcMotor WiperMotor;
+    private DcMotor Extension;
+
+    private DcMotor LeftViper;
+    private DcMotor RightViper;
 
     private Servo Claw;
     private Servo rollerClaw;
 
+    private boolean aG2ButtonPreviousState;
+    private boolean bG2ButtonPreviousState;
     private boolean aButtonPreviousState;
     private boolean bButtonPreviousState;
     private boolean xButtonPreviousState;
@@ -40,8 +45,12 @@ public class teleop extends OpMode {
         Claw = hardwareMap.get(Servo.class, "Claw");
         Claw.setDirection(Servo.Direction.REVERSE);
 
-        WiperMotor = hardwareMap.get(DcMotor.class, "WiperMotor");
-        WiperMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        Extension = hardwareMap.get(DcMotor.class, "Extension");
+        Extension.setDirection(DcMotorSimple.Direction.FORWARD);
+        LeftViper = hardwareMap.get(DcMotor.class, "LeftViper");
+        LeftViper.setDirection(DcMotorSimple.Direction.REVERSE);
+        RightViper = hardwareMap.get(DcMotor.class, "RightViper");
+        RightViper.setDirection(DcMotorSimple.Direction.FORWARD);
 
         rollerClaw = hardwareMap.get(Servo.class, "rollerClaw");
         rollerClaw.setDirection(Servo.Direction.REVERSE);
@@ -55,7 +64,10 @@ public class teleop extends OpMode {
         FrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        WiperMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LeftViper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RightViper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         aButtonPreviousState = false;
         bButtonPreviousState = false;
@@ -74,7 +86,7 @@ public class teleop extends OpMode {
         resetRuntime();
         Claw.setPosition(0.0);
         rollerClaw.setPosition(1.0);
-        WiperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         DrivetrainState = DrivetrainMode.NORMAL;
     }
@@ -85,10 +97,14 @@ public class teleop extends OpMode {
         double strafe = gamepad1.left_stick_x;
         double rotation = gamepad1.right_stick_x;
 
+
         telemetry.addData("Controller Left Y", -gamepad1.left_stick_y);
         telemetry.addData("Controller Left X", gamepad1.left_stick_x);
         telemetry.addData("Controller Right X", gamepad1.right_stick_x);
         telemetry.addData("Claw Position", Claw.getPosition());
+        telemetry.addData("Center Viper Position", Extension.getCurrentPosition());
+        telemetry.addData("Left/Right Viper Position", LeftViper.getCurrentPosition());
+
 
         if(gamepad1.a && !aButtonPreviousState) {
             Claw.setPosition(0.03);
@@ -97,14 +113,31 @@ public class teleop extends OpMode {
         }
 
         if(gamepad1.left_bumper && !leftBumperButtonPreviousState) {
-            WiperMotor.setTargetPosition(Constants.ViperUpperGoalPosition);
-            WiperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            WiperMotor.setPower(0.75);
+            LeftViper.setTargetPosition(Constants.ViperUpperAngle);
+            RightViper.setTargetPosition(Constants.ViperUpperAngle);
+            LeftViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RightViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LeftViper.setPower(0.75);
+            RightViper.setPower(0.75);
         } else if(gamepad1.right_bumper && !rightBumperButtonPreviousState) {
-            WiperMotor.setTargetPosition(Constants.ViperRetractedPosition);
-            WiperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            WiperMotor.setPower(0.75);
+            LeftViper.setTargetPosition(Constants.ViperLowerAngle);
+            RightViper.setTargetPosition(Constants.ViperLowerAngle);
+            LeftViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RightViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LeftViper.setPower(0.75);
+            RightViper.setPower(0.75);
         }
+
+        if(gamepad2.a && !aG2ButtonPreviousState) {
+            Extension.setTargetPosition(Constants.ViperUpperGoalPosition);
+            Extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        } else if(gamepad2.b && !bG2ButtonPreviousState) {
+            Extension.setTargetPosition(Constants.ViperRetractedPosition);
+            Extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+
 
         if(gamepad1.x && !xButtonPreviousState) {
             if(DrivetrainState == DrivetrainMode.SLOW) {
@@ -116,6 +149,8 @@ public class teleop extends OpMode {
 
         aButtonPreviousState = gamepad1.a;
         bButtonPreviousState = gamepad1.b;
+        aG2ButtonPreviousState = gamepad2.a;
+        bG2ButtonPreviousState = gamepad2.b;
         xButtonPreviousState = gamepad1.x;
         leftBumperButtonPreviousState = gamepad1.left_bumper;
         rightBumperButtonPreviousState = gamepad1.right_bumper;
